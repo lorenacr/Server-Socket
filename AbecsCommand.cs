@@ -25,7 +25,8 @@ namespace Server_Socket
             /// SYN byte indicates the begining of a package.
             /// </summary>
             public const byte SYN_BYTE = 0x16;
-
+                        
+            
             // Members
             /// <summary>
             /// Abecs commands use SYN byte to indicate beggining of a package.

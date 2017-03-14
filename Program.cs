@@ -8,6 +8,16 @@ namespace Server_Socket
 {
     public class SynchronousSocketListener
     {
+        /// <summary>
+        /// ACK byte indicates positive acknowledge.
+        /// </summary>
+        public const byte ACK_BYTE = 0x06;
+        /// <summary>
+        /// NAK byte indicates negative acknowledge.
+        /// </summary>
+        public const byte NAK_BYTE = 0x15;
+
+
         public static void StartListening()
         {
             IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
@@ -16,6 +26,7 @@ namespace Server_Socket
 
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+            Socket handler = null;
 
             try
             {
@@ -24,31 +35,50 @@ namespace Server_Socket
 
                 Console.WriteLine("Waiting for a connection...");
 
-                Socket handler = listener.Accept();
+                handler = listener.Accept();
 
                 Console.WriteLine("Connection Accepted.");
 
-                //byte[] msg = Encoding.ASCII.GetBytes("<PinpadCommand xmlns =\"http://schemas.datacontract.org/2004/07/WcfServiceLibrary12\"><Command>GIN00200</Command><IsCustomized>false</IsCustomized></PinpadCommand>");
                 AbecsCommand command = new AbecsCommand();
-                PinpadCommand rawCommand = new PinpadCommand();
 
                 while (true)
                 {
                     Console.WriteLine("Digite o comando:");
+                    
+                    byte[] msg = command.GetRequestBody(Console.ReadLine());
 
-                    rawCommand.Command = Console.ReadLine();
-                    rawCommand.IsCustomized = false;
-
-                    string serializedCommand = rawCommand.SerializeToXml();
-
-                    int ret = handler.Send(command.GetRequestBody(serializedCommand));
+                    int ret = handler.Send(msg);
                     Console.WriteLine("{0} - Message Sent.", ret);
+
+                    byte[] buffer = new byte[1];
+
+                    handler.ReceiveTimeout = 2000;
+                    ret = handler.Receive(buffer);
+                    Console.WriteLine(Encoding.ASCII.GetString(buffer));
+                    Console.WriteLine("{0} - Receive status.", ret);
+
+                    //// ACK
+                    //if (buffer == ACK_BYTE)
+                    //{
+                    //    continue;
+                    //}
+                    //// NAK
+                    //else if (buffer == NAK_BYTE)
+                    //{
+                    //    break;
+                    //}
                 }
             
             }
-            catch (Exception e)
+            catch (SocketException e)
             {
-                //Console.WriteLine(e.ToString());
+                // Closes the connection if doesn't get a response
+                if (e.SocketErrorCode == SocketError.TimedOut) {
+                    handler.Shutdown(SocketShutdown.Both);
+                    Console.WriteLine("Connection Closed.");
+                }
+              
+                Console.WriteLine(e.ToString());
             }
 
             Console.WriteLine("\nPress ENTER to continue...");
