@@ -22,7 +22,7 @@ namespace Server_Socket
         {
             IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 8583);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 8483);
 
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -41,11 +41,17 @@ namespace Server_Socket
 
                 AbecsCommand command = new AbecsCommand();
 
-                while (true)
+                int nakCounter = 0;
+                byte[] msg = null;
+
+                while (true && nakCounter <= 3)
                 {
-                    Console.WriteLine("Digite o comando:");
-                    
-                    byte[] msg = command.GetRequestBody(Console.ReadLine());
+                    if (nakCounter == 0)
+                    {
+                        Console.WriteLine("Digite o comando:");
+
+                        msg = command.GetRequestBody(Console.ReadLine());
+                    }
 
                     int ret = handler.Send(msg);
                     Console.WriteLine("{0} - Message Sent.", ret);
@@ -54,21 +60,25 @@ namespace Server_Socket
 
                     handler.ReceiveTimeout = 2000;
                     ret = handler.Receive(buffer);
-                    Console.WriteLine(Encoding.ASCII.GetString(buffer));
                     Console.WriteLine("{0} - Receive status.", ret);
 
-                    //// ACK
-                    //if (buffer == ACK_BYTE)
-                    //{
-                    //    continue;
-                    //}
-                    //// NAK
-                    //else if (buffer == NAK_BYTE)
-                    //{
-                    //    break;
-                    //}
+                    // ACK
+                    if (buffer[0] == ACK_BYTE)
+                    {
+                        nakCounter = 0;
+                        continue;
+                    }
+                    // NAK
+                    else if (buffer[0] == NAK_BYTE)
+                    {
+                        nakCounter++;
+                        break;
+                    }
                 }
-            
+
+                handler.Shutdown(SocketShutdown.Both);
+                Console.WriteLine("Connection Closed after 3 NAK's received.");
+
             }
             catch (SocketException e)
             {

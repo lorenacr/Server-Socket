@@ -1,7 +1,6 @@
 C:\workspace\Pinpad stuff\Server\Server Socket\bin\Debug\Server Socket.exe.config
 C:\workspace\Pinpad stuff\Server\Server Socket\bin\Debug\Server Socket.exe
 C:\workspace\Pinpad stuff\Server\Server Socket\bin\Debug\Server Socket.pdb
-C:\workspace\Pinpad stuff\Server\Server Socket\obj\Debug\Server Socket.csprojResolveAssemblyReference.cache
 C:\workspace\Pinpad stuff\Server\Server Socket\obj\Debug\Server Socket.exe
 C:\workspace\Pinpad stuff\Server\Server Socket\obj\Debug\Server Socket.pdb
 C:\workspace\Pinpad stuff\Server\Server Socket\bin\Debug\Buy4.Framework.Portable.dll
@@ -11,3 +10,4 @@ C:\workspace\Pinpad stuff\Server\Server Socket\bin\Debug\Buy4.Framework.Portable
 C:\workspace\Pinpad stuff\Server\Server Socket\bin\Debug\System.Net.Http.Extensions.xml
 C:\workspace\Pinpad stuff\Server\Server Socket\bin\Debug\System.Net.Http.Primitives.xml
 C:\workspace\Pinpad stuff\Server\Server Socket\obj\Debug\Server Socket.csproj.App.config
+C:\workspace\Pinpad stuff\Server\Server Socket\obj\Debug\Server Socket.csprojResolveAssemblyReference.cache
