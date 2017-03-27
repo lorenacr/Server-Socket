@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Dlp.Buy4.Framework.Portable.Serialization.Extension;
+using System.IO;
 
 namespace Server_Socket
 {
@@ -42,7 +43,7 @@ namespace Server_Socket
                 AbecsCommand command = new AbecsCommand();
 
                 int nakCounter = 0;
-                byte[] msg = null;
+                byte[] msg = new byte[1024];
 
                 while (true && nakCounter <= 3)
                 {
@@ -50,30 +51,35 @@ namespace Server_Socket
                     {
                         Console.WriteLine("Digite o comando:");
 
+                        // To read more than 254 chars (Console.ReadLine limit)
+                        Stream inputStream = Console.OpenStandardInput(msg.Length);
+                        Console.SetIn(new StreamReader(inputStream));
+
                         msg = command.GetRequestBody(Console.ReadLine());
                     }
-
+                    
                     int ret = handler.Send(msg);
                     Console.WriteLine("{0} - Message Sent.", ret);
 
-                    byte[] buffer = new byte[1];
+                    byte[] buffer = new byte[512];
 
                     handler.ReceiveTimeout = 2000;
+
+                    // Receive ACK or NAK
                     ret = handler.Receive(buffer);
                     Console.WriteLine("{0} - Receive status.", ret);
-
-                    // ACK
+                    
+                 
                     if (buffer[0] == ACK_BYTE)
                     {
                         nakCounter = 0;
-                        continue;
                     }
-                    // NAK
                     else if (buffer[0] == NAK_BYTE)
                     {
                         nakCounter++;
                         break;
                     }
+                    
                 }
 
                 handler.Shutdown(SocketShutdown.Both);
